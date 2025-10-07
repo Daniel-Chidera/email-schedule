@@ -70,12 +70,22 @@ mysqli_stmt_close($stmt);
     <title>Dashboard - EmailScheduler</title>
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-   
+  
 </head>
 <body>
+    <!-- Hamburger Menu -->
+    <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
     <div class="dashboard-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                     <rect width="32" height="32" rx="8" fill="#8B5CF6"/>
@@ -132,6 +142,25 @@ mysqli_stmt_close($stmt);
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
                             Settings
+                        </a>
+                    </li>
+                </ul>
+                <div class="nav-divider"></div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link danger" onclick="confirmDeleteAll(event)">
+                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Delete All Reminders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="logout.php" class="nav-link">
+                            <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Logout
                         </a>
                     </li>
                 </ul>
@@ -205,7 +234,7 @@ mysqli_stmt_close($stmt);
             <div class="content-section">
                 <div class="section-header">
                     <h2 class="section-title">Recent Scheduled Emails</h2>
-                    <a href="schedule.php" class="schedule-btn">
+                    <a href="scheduled.php" class="schedule-btn">
                         <span>+</span> Schedule New Email
                     </a>
                 </div>
@@ -218,6 +247,7 @@ mysqli_stmt_close($stmt);
                                     <th>Subject</th>
                                     <th>Scheduled Date</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -230,6 +260,16 @@ mysqli_stmt_close($stmt);
                                             <span class="status-badge status-<?php echo $email['status']; ?>">
                                                 <?php echo htmlspecialchars($email['status']); ?>
                                             </span>
+                                        </td>
+                                        <td>
+                                            <div style="display: flex; gap: 8px;">
+                                                <a href="edit.php?id=<?php echo $email['id']; ?>" style="padding: 6px 12px; background: #3b82f6; color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">
+                                                    Edit
+                                                </a>
+                                                <a href="#" onclick="confirmDelete(event, <?php echo $email['id']; ?>)" style="padding: 6px 12px; background: #ef4444; color: white; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500;">
+                                                    Delete
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -253,5 +293,51 @@ mysqli_stmt_close($stmt);
             </footer>
         </main>
     </div>
+
+    <script>
+        // Hamburger menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        // Close sidebar when clicking nav links on mobile
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 968) {
+                    hamburger.classList.remove('active');
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Confirm delete all reminders
+        function confirmDeleteAll(event) {
+            event.preventDefault();
+            if (confirm('Are you sure you want to delete ALL scheduled email reminders? This action cannot be undone.')) {
+                window.location.href = 'dashboard.php?delete_all=confirm';
+            }
+        }
+
+        // Confirm single email delete
+        function confirmDelete(event, emailId) {
+            event.preventDefault();
+            if (confirm('Are you sure you want to delete this scheduled email?')) {
+                window.location.href = 'dashboard.php?delete=' + emailId;
+            }
+        }
+    </script>
 </body>
 </html>
