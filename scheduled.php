@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = trim($_POST['message']);
     $scheduled_date = $_POST['scheduled_date'];
     $scheduled_time = $_POST['scheduled_time'];
+    $recurrence = $_POST['recurrence'];
     
     // Validate recipient email
     if (empty($recipient_email)) {
@@ -66,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // If no errors, save to database
     if (empty($errors)) {
-        $stmt = mysqli_prepare($conn, "INSERT INTO scheduled_emails (user_id, recipient_email, subject, message, scheduled_time) VALUES (?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($stmt, "issss", $user_id, $recipient_email, $subject, $message, $scheduled_datetime);
+        $stmt = mysqli_prepare($conn, "INSERT INTO scheduled_emails (user_id, recipient_email, subject, message, scheduled_time, recurrence) VALUES (?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "isssss", $user_id, $recipient_email, $subject, $message, $scheduled_datetime, $recurrence);
         
         if (mysqli_stmt_execute($stmt)) {
             $success_message = 'Email scheduled successfully!';
@@ -379,6 +380,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             required
                         >
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recurrence">Repeat <span style="color: #ef4444;">*</span></label>
+                    <select 
+                        id="recurrence" 
+                        name="recurrence" 
+                        required
+                    >
+                        <option value="none">None (Send Once)</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                    <p class="hint-text">Choose if this email should repeat automatically</p>
                 </div>
 
                 <div class="form-actions">

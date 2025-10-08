@@ -51,6 +51,7 @@ $recipient_email = $email_data['recipient_email'];
 $subject = $email_data['subject'];
 $message = $email_data['message'];
 $scheduled_datetime = $email_data['scheduled_time'];
+$recurrence = $email_data['recurrence'];
 
 // Split datetime into date and time
 $scheduled_date = date('Y-m-d', strtotime($scheduled_datetime));
@@ -64,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = trim($_POST['message']);
     $scheduled_date = $_POST['scheduled_date'];
     $scheduled_time = $_POST['scheduled_time'];
+    $recurrence = $_POST['recurrence'];
     
     // Validate recipient email
     if (empty($recipient_email)) {
@@ -97,9 +99,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // If no errors, update database
     if (empty($errors)) {
-        $update_query = "UPDATE scheduled_emails SET recipient_email = ?, subject = ?, message = ?, scheduled_time = ? WHERE id = ? AND user_id = ?";
+        $update_query = "UPDATE scheduled_emails SET recipient_email = ?, subject = ?, message = ?, scheduled_time = ?, recurrence = ? WHERE id = ? AND user_id = ?";
         $update_stmt = mysqli_prepare($conn, $update_query);
-        mysqli_stmt_bind_param($update_stmt, "ssssii", $recipient_email, $subject, $message, $new_scheduled_datetime, $email_id, $user_id);
+        mysqli_stmt_bind_param($update_stmt, "sssssii", $recipient_email, $subject, $message, $new_scheduled_datetime, $recurrence, $email_id, $user_id);
         
         if (mysqli_stmt_execute($update_stmt)) {
             $_SESSION['success_message'] = 'Email updated successfully!';
@@ -396,6 +398,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             required
                         >
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recurrence">Repeat <span style="color: #ef4444;">*</span></label>
+                    <select 
+                        id="recurrence" 
+                        name="recurrence" 
+                        required
+                    >
+                        <option value="none" <?php echo $recurrence == 'none' ? 'selected' : ''; ?>>None (Send Once)</option>
+                        <option value="daily" <?php echo $recurrence == 'daily' ? 'selected' : ''; ?>>Daily</option>
+                        <option value="weekly" <?php echo $recurrence == 'weekly' ? 'selected' : ''; ?>>Weekly</option>
+                        <option value="monthly" <?php echo $recurrence == 'monthly' ? 'selected' : ''; ?>>Monthly</option>
+                        <option value="yearly" <?php echo $recurrence == 'yearly' ? 'selected' : ''; ?>>Yearly</option>
+                    </select>
+                    <p class="hint-text">Choose if this email should repeat automatically</p>
                 </div>
 
                 <div class="form-actions">
